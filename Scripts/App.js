@@ -23,14 +23,20 @@ const getPoke = async (pokeSearch) => {
     let id = data.order;
     fetchEvolutionChain(pokeSearch);
     encounter(data.id)
+    abilities.innerText = data.abilities.map(ability => titleIt(ability.ability.name)).join(', ');
+    moves.innerText = data.moves.map(move => titleIt(move.move.name)).join(', ');
 }
 getPoke(pokeSearch)
+
+btn.addEventListener('click', async ()=>{
+    await getPoke(Math.floor(Math.random() * 1008) + 1)
+})
 
 const encounter = async (id) => {
     const promise = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/encounters`)
     const data = await promise.json();
     if (data.length > 0){
-        loc.innerText =  data[0].location_area.name;;
+        loc.innerText =  titleIt(data[0].location_area.name);
     } else {
         loc.innerText = "No encounter locations found for this Pokémon."
     }
