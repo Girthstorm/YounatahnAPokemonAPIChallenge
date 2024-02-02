@@ -37,3 +37,17 @@ body {
     font-family: 'Nunito', sans-serif; 
     font-weight: 700;
 }
+
+.outlined {
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black;
+}
+
+.outlined2 {
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.breakers {
+    border-top-width: 6px;
+}

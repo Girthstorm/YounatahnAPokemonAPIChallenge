@@ -5,34 +5,71 @@ let pokeTypes = document.getElementById("pokeTypes");
 let pokeImg = document.getElementById("pokeImg");
 let pokeId = "";
 let searchBar = document.getElementById("searchBar");
-
-
+let btn = document.getElementById("btn");
+let evoPath = document.getElementById("evoPath");
+let loc = document.getElementById("loc")
+let abilities = document.getElementById("abilities");
+let moves = document.getElementById("moves");
 let pokeSearch = "bulbasaur";
+let evoData, evoPaths;
 
 const getPoke = async (pokeSearch) => {
     const promise = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokeSearch}`)
     const data = await promise.json();
     console.log(data);
     populateData(data);
-    await clearType();
-    await typeing(data.types.map(data => data.type.name));
+    clearType();
+    typeing(data.types.map(data => data.type.name));
+    let id = data.order;
+    fetchEvolutionChain(pokeSearch);
+    encounter(data.id)
 }
 getPoke(pokeSearch)
 
-// digimonInput.addEventListener('keydown', async (event)=>{
-//     if(event.key === "Enter"){
-//         digimon = await digimonApi(event.target.value)
-//         console.log(digimon)
-//         digimonImg.src = digimon[0].img;
-//         digimonName.textContent = digimon[0].name;
-//         digimonStatus.textContent = digimon[0].level;
-//     }
-// })
+const encounter = async (id) => {
+    const promise = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/encounters`)
+    const data = await promise.json();
+    if (data.length > 0){
+        loc.innerText =  data[0].location_area.name;;
+    } else {
+        loc.innerText = "No encounter locations found for this Pokémon."
+    }
+}
+
+
+
+
+//Not getting right evo link
+const fetchEvolutionChain = async (pokeSearch) => {
+    //use pokemon-species api
+    const promise = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokeSearch}`)
+    const data = await promise.json()
+    console.log(data)
+    const evoChainUrl = data.evolution_chain.url;
+    console.log(evoChainUrl)
+    const promise2 = await fetch(evoChainUrl);
+    const data2 = await promise2.json();
+    let currentPoke = data2.chain;
+    const evos = [];
+    while (currentPoke) {
+        evos.push(currentPoke.species.name);
+        if (currentPoke.evolves_to.length > 0) {
+            currentPoke = currentPoke.evolves_to[0];
+        } else {
+            currentPoke = null;
+        }
+    }
+    evos.forEach(name => {
+        const finishedEvo = document.createElement('p');
+        finishedEvo.textContent = titleIt(name);
+        evoPath.appendChild(finishedEvo);
+    });
+}
 
 
 searchBar.addEventListener('keydown', async(event)=> {
     if(event.key === "Enter"){
-        getPoke(searchBar.value.toLowerCase());
+        await getPoke(searchBar.value.toLowerCase());
     }
     
 } )
@@ -42,9 +79,22 @@ const populateData = async data =>{
     pokeNum.textContent = '#' + String(data.id).padStart(3, '0');
     pokeImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`
     pokeId = data.id
+    pokeImg.alt = titleIt(data.name)
     
+    loc.innerText = "";
+    abilities.innerText = "";
+    moves.innerText = "";
+    
+
+
 }
 
+const getEvoPath = () => {
+    if(evoData == null){
+        let evo = {};
+
+    }
+}
 
 //Favorite button
 let isFav = false
@@ -82,18 +132,14 @@ function titleIt(word, split = '-', joiner = ' ') {
 
 const clearType = () => {
     pokeTypes.innerHTML = ""
+    evoPath.innerHTML = ""
 }
 
 
 const typeing = type => {
-    
+    //COuld have dont it to where it add the image and the src is interpolated like this <img src="./Assets/${Bug}.png" class="max-w-[45%]" alt="Bug Type
     console.log(type);
     type.forEach(element => {
-        
-    
-
-
-
     switch (element) {
         case 'bug':
             pokeTypes.innerHTML += '<img src="./Assets/Bug.png" class="max-w-[45%]" alt="Bug Type">';
